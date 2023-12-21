@@ -1,4 +1,3 @@
-from thefuzz import fuzz
 import re
 
 
