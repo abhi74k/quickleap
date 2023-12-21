@@ -1,7 +1,32 @@
 import re
+from thefuzz import fuzz
 
 
-def fuzz_match_string(query_string, sentence):
+def fuzzy_approx_match_string(query_string, sentence):
+    strings = query_string.split(' ')
+    strings = [string.strip() for string in strings if string != '']
+
+    ret = []
+    for string in strings:
+        match_ratio = fuzz.partial_token_sort_ratio(string, sentence)
+        if match_ratio >= 70.0:
+            ret.append(sentence)
+            break
+
+    return len(ret) > 0, ret
+
+
+def fuzzy_approx_match_string_list(query_string, sentence_list):
+    matched_sentence = []
+    for sentence in sentence_list:
+        matched, match_info = fuzzy_approx_match_string(query_string, sentence)
+        if matched:
+            matched_sentence.append(sentence)
+
+    return matched_sentence
+
+
+def fuzzy_regex_match_string(query_string, sentence):
     strings = query_string.split(' ')
     strings = [string.strip() for string in strings if string != '']
 
@@ -14,10 +39,10 @@ def fuzz_match_string(query_string, sentence):
     return len(ret) > 0, ret
 
 
-def fuzzy_match_string_list(query_string, sentence_list):
+def fuzzy_regex_match_string_list(query_string, sentence_list):
     matched_sentence = []
     for sentence in sentence_list:
-        matched, match_info = fuzz_match_string(query_string, sentence)
+        matched, match_info = fuzzy_regex_match_string(query_string, sentence)
         if matched:
             matched_sentence.append((match_info, sentence))
 
@@ -25,5 +50,5 @@ def fuzzy_match_string_list(query_string, sentence_list):
 
 
 if __name__ == '__main__':
-    ret = fuzz_match_string("win open", "Windows list open windows")
+    ret = fuzzy_regex_match_string("win open", "Windows list open windows")
     print(ret)
