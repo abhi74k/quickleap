@@ -12,48 +12,42 @@ from windows_utils import get_all_windows
 
 class EntryWithListBox(Entry):
     def __init__(self, autocompleteList, *args, **kwargs):
-
-        # Listbox length
-        if 'listboxLength' in kwargs:
-            self.listboxLength = kwargs['listboxLength']
-            del kwargs['listboxLength']
-        else:
-            self.listboxLength = 8
-
-        # Custom matches function
         Entry.__init__(self, *args, **kwargs)
-        self.focus()
 
         self.default_window_list = autocompleteList
-        self.window_title_list = [window.title for window in self.default_window_list]
-
         self.default_text = 'Enter window title...'
 
         self.var = self["textvariable"]
         if self.var == '':
             self.var = self["textvariable"] = StringVar(value=self.default_text)
 
-        self.selection_range(0, END)
-
-        self.var.trace('w', self.changed)
-        self.bind("<Right>", self.selection)
-        self.bind("<Up>", self.moveUp)
-        self.bind("<Down>", self.moveDown)
-
-        self.root = args[0]
         self.item_height = 18  # Approximate pixel height of one item in the listbox
         self.extra_height = 5
         self.window_width = 500
         self.max_height = 16
 
         self.listboxUp = False
+        self.root = args[0]
 
-    def changed(self, name, index, mode):
+        self.focus()
+        self.selection_range(0, END)
+
+        self.var.trace('w', self.on_entry_change)
+        self.bind("<Right>", self.selection)
+        self.bind("<Up>", self.moveUp)
+        self.bind("<Down>", self.moveDown)
+        self.bind("<Return>", self.selection)
+
+    def on_entry_change(self, name, index, mode):
+
+        # We should not react to default text
         if self.var.get() == self.default_text:
             if self.listboxUp:
                 self.listbox.destroy()
                 self.listboxUp = False
         else:
+
+            # Display all open windows when no text is entered
             if self.var.get().strip() == '':
                 print(f"Default window list")
                 self.words = self.default_window_list
@@ -71,7 +65,6 @@ class EntryWithListBox(Entry):
                                            xscrollcommand=self.scrollbar_x.set)
                     self.listbox.bind("<Button-1>", self.selection)
                     self.listbox.bind("<Right>", self.selection)
-                    self.listbox.bind("<Return>", self.selection)
                     self.listbox.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
                     self.listboxUp = True
 
@@ -91,12 +84,10 @@ class EntryWithListBox(Entry):
 
     def selection(self, event):
         if self.listboxUp:
-            window_title = self.listbox.get(ACTIVE)
             selected_index = self.listbox.curselection()[0]
 
             self.listbox.destroy()
             self.listboxUp = False
-            # self.icursor(END)
 
             root.geometry(f"{self.window_width}x{self.winfo_height()}")
 
@@ -154,7 +145,7 @@ if __name__ == '__main__':
     root = Tk()
     root.title('Quickleap')
 
-    entry = EntryWithListBox(autocompleteList, root, listboxLength=6, width=100)
+    entry = EntryWithListBox(autocompleteList, root, width=100)
     entry.grid(row=0, column=0)
 
     root.mainloop()
