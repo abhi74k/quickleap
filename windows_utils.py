@@ -31,6 +31,7 @@ def switch_to_window(title):
         window = gw.getWindowsWithTitle(title)[0]  # This will get the first window that matches the title
         if window is not None:
             # If the window is found, activate it
+            window.show()
             window.activate()
             return True
         else:

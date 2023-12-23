@@ -49,6 +49,16 @@ def fuzzy_regex_match_string_list(query_string, sentence_list):
     return matched_sentence
 
 
+def fuzzy_regex_match_window_list(query_string, window_list):
+    matched_sentence = []
+    for window in window_list:
+        matched, match_info = fuzzy_regex_match_string(query_string, window.title)
+        if matched:
+            matched_sentence.append((match_info, window))
+
+    return matched_sentence
+
+
 if __name__ == '__main__':
     ret = fuzzy_regex_match_string("win open", "Windows list open windows")
     print(ret)
