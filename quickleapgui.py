@@ -11,10 +11,10 @@ from windows_utils import get_all_windows
 
 
 class EntryWithListBox(Entry):
-    def __init__(self, autocompleteList, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         Entry.__init__(self, *args, **kwargs)
 
-        self.default_window_list = autocompleteList
+        self.default_window_list = None
         self.default_text = 'Enter window title...'
 
         self.var = self["textvariable"]
@@ -49,6 +49,11 @@ class EntryWithListBox(Entry):
 
             # Display all open windows when no text is entered
             if self.var.get().strip() == '':
+                if self.default_window_list is None:
+                    autocompleteList = get_all_windows()
+                    autocompleteList = [window for window in autocompleteList if window.title.strip() != '']
+                    self.default_window_list = autocompleteList
+
                 print(f"Default window list")
                 self.words = self.default_window_list
             else:
@@ -139,13 +144,10 @@ class EntryWithListBox(Entry):
 
 
 if __name__ == '__main__':
-    autocompleteList = get_all_windows()
-    autocompleteList = [window for window in autocompleteList if window.title.strip() != '']
-
     root = Tk()
     root.title('Quickleap')
 
-    entry = EntryWithListBox(autocompleteList, root, width=100)
+    entry = EntryWithListBox(root, width=100)
     entry.grid(row=0, column=0)
 
     root.mainloop()
